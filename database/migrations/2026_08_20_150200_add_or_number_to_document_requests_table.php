@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('document_requests', function (Blueprint $table) {
-            $table->string('or_number')->nullable()->unique()->after('paid_at');
+            $table->string('or_number')->nullable()->unique();
         });
     }
 

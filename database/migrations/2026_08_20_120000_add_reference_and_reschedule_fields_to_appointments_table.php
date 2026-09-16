@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->string('reference_code')->nullable()->unique()->after('id');
-            $table->date('original_date')->nullable()->after('date');
-            $table->text('reschedule_reason')->nullable()->after('time_slot');
-            $table->timestamp('rescheduled_at')->nullable()->after('reschedule_reason');
+            $table->string('reference_code')->nullable()->unique();
+            $table->date('original_date')->nullable();
+            $table->text('reschedule_reason')->nullable();
+            $table->timestamp('rescheduled_at')->nullable();
         });
     }
 

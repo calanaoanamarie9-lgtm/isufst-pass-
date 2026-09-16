@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->string('original_time_slot')->nullable()->after('original_date');
-            $table->string('reschedule_remarks')->nullable()->after('reschedule_reason');
+            $table->string('original_time_slot')->nullable();
+            $table->string('reschedule_remarks')->nullable();
         });
     }
 

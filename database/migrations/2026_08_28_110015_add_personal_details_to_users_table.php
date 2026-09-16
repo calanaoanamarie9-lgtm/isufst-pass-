@@ -9,15 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('contact_number')->nullable()->after('registration_type');
-            $table->string('student_id')->nullable()->after('contact_number');
-            $table->string('course')->nullable()->after('student_id');
-            $table->string('year_graduated')->nullable()->after('course');
-            $table->string('organization')->nullable()->after('year_graduated');
-            $table->string('address')->nullable()->after('organization');
-            $table->string('purpose')->nullable()->after('address');
-            $table->string('relationship_to_student')->nullable()->after('purpose');
-            $table->string('student_full_name')->nullable()->after('relationship_to_student');
+            $table->string('contact_number')->nullable();
+            $table->string('student_id')->nullable();
+            $table->string('course')->nullable();
+            $table->string('year_graduated')->nullable();
+            $table->string('organization')->nullable();
+            $table->string('address')->nullable();
+            $table->string('purpose')->nullable();
+            $table->string('relationship_to_student')->nullable();
+            $table->string('student_full_name')->nullable();
         });
     }
 

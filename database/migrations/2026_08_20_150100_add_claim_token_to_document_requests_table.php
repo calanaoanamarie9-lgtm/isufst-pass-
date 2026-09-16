@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('document_requests', function (Blueprint $table) {
-            $table->string('claim_token', 36)->nullable()->unique()->after('request_number');
+            $table->string('claim_token', 36)->nullable()->unique();
         });
     }
 

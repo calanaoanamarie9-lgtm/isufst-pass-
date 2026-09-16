@@ -16,9 +16,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('document_requests', function (Blueprint $table) {
-            $table->string('payment_reference')->nullable()->after('others_specification');
-            $table->decimal('payment_amount', 10, 2)->nullable()->after('payment_reference');
-            $table->date('payment_date')->nullable()->after('payment_amount');
+            $table->string('payment_reference')->nullable();
+            $table->decimal('payment_amount', 10, 2)->nullable();
+            $table->date('payment_date')->nullable();
         });
     }
 };

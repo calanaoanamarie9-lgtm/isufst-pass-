@@ -12,18 +12,18 @@ return new class extends Migration
             $table->dropForeign(['document_id']);
             $table->dropColumn(['document_id', 'purpose']);
 
-            $table->string('purpose_type')->nullable()->after('status');
-            $table->text('transfer_to')->nullable()->after('purpose_type');
-            $table->string('educational_status')->nullable()->after('transfer_to');
-            $table->string('educational_level')->nullable()->after('educational_status');
-            $table->string('claim_mode')->nullable()->after('educational_level');
-            $table->string('representative_name')->nullable()->after('claim_mode');
-            $table->string('others_specification')->nullable()->after('representative_name');
+            $table->string('purpose_type')->nullable();
+            $table->text('transfer_to')->nullable();
+            $table->string('educational_status')->nullable();
+            $table->string('educational_level')->nullable();
+            $table->string('claim_mode')->nullable();
+            $table->string('representative_name')->nullable();
+            $table->string('others_specification')->nullable();
 
-            $table->string('student_name')->nullable()->after('user_id');
-            $table->text('student_address')->nullable()->after('student_name');
-            $table->string('student_contact')->nullable()->after('student_address');
-            $table->string('student_course_year')->nullable()->after('student_contact');
+            $table->string('student_name')->nullable();
+            $table->text('student_address')->nullable();
+            $table->string('student_contact')->nullable();
+            $table->string('student_course_year')->nullable();
         });
     }
 

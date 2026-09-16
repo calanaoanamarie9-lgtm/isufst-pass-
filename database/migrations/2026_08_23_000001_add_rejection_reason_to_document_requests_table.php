@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('document_requests', function (Blueprint $table) {
-            $table->string('rejection_reason')->nullable()->after('cancelled_at');
+            $table->string('rejection_reason')->nullable();
         });
     }
 

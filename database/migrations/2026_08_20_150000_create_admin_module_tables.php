@@ -44,7 +44,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_active')->default(true)->after('role');
+            $table->boolean('is_active')->default(true);
         });
 
         DB::table('settings')->insert([

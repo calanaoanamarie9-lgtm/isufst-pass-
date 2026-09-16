@@ -16,7 +16,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->string('reschedule_remarks')->nullable()->after('reschedule_reason');
+            $table->string('reschedule_remarks')->nullable();
         });
     }
 };

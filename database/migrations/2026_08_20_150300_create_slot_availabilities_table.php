@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('offices', function (Blueprint $table) {
-            $table->unsignedInteger('default_slot_capacity')->default(15)->after('hours');
+            $table->unsignedInteger('default_slot_capacity')->default(15);
         });
 
         Schema::create('slot_availabilities', function (Blueprint $table) {

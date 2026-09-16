@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->uuid('qr_token')->nullable()->unique()->after('reference_code');
+            $table->uuid('qr_token')->nullable()->unique();
         });
 
         DB::table('appointments')
