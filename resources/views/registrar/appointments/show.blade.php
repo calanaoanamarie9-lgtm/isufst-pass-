@@ -1,0 +1,825 @@
+<x-app-layout>
+    <div class="min-h-screen bg-slate-50 py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- =========================================================
+                BACK
+            ========================================================== --}}
+            <a href="{{ route('registrar.appointments.index') }}"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-700 transition">
+
+                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 19l-7-7 7-7"/>
+                </svg>
+
+                Back to Appointments
+            </a>
+
+
+            {{-- =========================================================
+                SUCCESS MESSAGE
+            ========================================================== --}}
+            @if (session('status'))
+                <div class="mt-5 flex items-start gap-3 bg-emerald-50
+                            border border-emerald-200 text-emerald-700
+                            rounded-2xl px-5 py-4">
+
+                    <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none"
+                         stroke="currentColor" viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M5 13l4 4L19 7"/>
+                    </svg>
+
+                    <p class="text-sm font-semibold">
+                        {{ session('status') }}
+                    </p>
+
+                </div>
+            @endif
+
+
+            {{-- =========================================================
+                PAGE HEADER
+            ========================================================== --}}
+            <div class="mt-6 bg-white rounded-3xl border border-slate-200
+                        shadow-sm overflow-hidden">
+
+                <div class="p-6 sm:p-8">
+
+                    <div class="flex flex-col lg:flex-row
+                                lg:items-center lg:justify-between gap-6">
+
+                        {{-- Student --}}
+                        <div class="flex items-center gap-4">
+
+                            <div class="w-16 h-16 rounded-2xl bg-blue-100
+                                        text-blue-800 flex items-center
+                                        justify-center text-xl font-extrabold
+                                        shrink-0">
+
+                                {{ strtoupper(substr($appointment->user->name, 0, 1)) }}
+
+                            </div>
+
+                            <div>
+
+                                <div class="flex flex-wrap items-center gap-2">
+
+                                    <h1 class="text-2xl font-extrabold text-slate-900">
+                                        {{ $appointment->user->name }}
+                                    </h1>
+
+                                    <span class="inline-flex px-2.5 py-1
+                                                 rounded-lg bg-slate-100
+                                                 text-[10px] font-bold
+                                                 uppercase tracking-wider
+                                                 text-slate-500">
+
+                                        {{ $appointment->reference_code }}
+
+                                    </span>
+
+                                </div>
+
+                                <p class="text-sm text-slate-500 mt-1">
+                                    Student Appointment
+                                </p>
+
+                                <p class="text-xs text-slate-400 mt-1">
+                                    {{ $appointment->user->email }}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Status --}}
+                        <div>
+
+                            <p class="text-[10px] font-bold uppercase
+                                      tracking-widest text-slate-400 mb-2 lg:text-right">
+                                Appointment Status
+                            </p>
+
+                            <span class="inline-flex items-center gap-2
+                                         px-4 py-2 rounded-full text-xs font-bold
+
+                                @if ($appointment->status === 'confirmed')
+                                    bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+
+                                @elseif ($appointment->status === 'checked_in')
+                                    bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200
+
+                                @elseif ($appointment->status === 'rescheduled')
+                                    bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200
+
+                                @elseif ($appointment->status === 'for_reschedule')
+                                    bg-orange-50 text-orange-700 ring-1 ring-orange-200
+
+                                @elseif ($appointment->status === 'completed')
+                                    bg-blue-50 text-blue-700 ring-1 ring-blue-200
+
+                                @elseif ($appointment->status === 'cancelled')
+                                    bg-red-50 text-red-600 ring-1 ring-red-200
+
+                                @elseif ($appointment->status === 'no_show')
+                                    bg-slate-100 text-slate-500 ring-1 ring-slate-200
+
+                                @else
+                                    bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200
+                                @endif
+                            ">
+
+                                <span class="w-2 h-2 rounded-full bg-current"></span>
+
+                                {{ \App\Enums\AppointmentStatus::tryFrom($appointment->status)?->label() ?? ucfirst($appointment->status) }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- =====================================================
+                    ACTION BAR
+                ====================================================== --}}
+                <div class="px-6 sm:px-8 py-4 bg-slate-50
+                            border-t border-slate-200">
+
+                    <div class="flex flex-wrap items-center gap-2">
+
+                        {{-- Approve --}}
+                        @if (in_array($appointment->status, ['pending', 'for_reschedule']))
+
+                            <form method="POST"
+                                  action="{{ route('registrar.appointments.confirm', $appointment) }}"
+                                  data-confirm="Confirm this appointment for the selected slot?"
+                                  data-confirm-ok="Yes, confirm"
+                                  data-confirm-icon="question"
+                                  data-confirm-title="Confirm appointment?">
+
+                                @csrf
+
+                                <button type="submit"
+                                        class="inline-flex items-center gap-2
+                                               px-4 py-2.5 rounded-xl
+                                               bg-emerald-600 text-white
+                                               text-xs font-bold
+                                               hover:bg-emerald-700
+                                               transition shadow-sm">
+
+                                    <svg class="w-4 h-4" fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M5 13l4 4L19 7"/>
+
+                                    </svg>
+
+                                    Approve Appointment
+
+                                </button>
+
+                            </form>
+
+                        @endif
+
+
+                        {{-- Reschedule --}}
+                        @unless (in_array($appointment->status, ['completed', 'cancelled', 'no_show']))
+
+                            <button
+                                type="button"
+
+                                @click="$dispatch('open-reschedule', {
+                                    id: {{ $appointment->id }},
+                                    student: @js($appointment->user->name),
+                                    studentId: @js($appointment->user->studentProfile?->student_id),
+                                    reference: @js($appointment->reference_code),
+                                    office: @js($appointment->office),
+                                    dateLabel: @js($appointment->date->format('F j, Y')),
+                                    timeSlot: @js($appointment->time_slot),
+                                    reason: @js($appointment->reschedule_reason)
+                                })"
+
+                                class="inline-flex items-center gap-2
+                                       px-4 py-2.5 rounded-xl
+                                       bg-indigo-50 border border-indigo-200
+                                       text-indigo-700 text-xs font-bold
+                                       hover:bg-indigo-100 transition">
+
+                                <svg class="w-4 h-4" fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="M8 7V3m8 4V3m-9 4h10M5 21h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z"/>
+
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="M9 15l2 2 4-4"/>
+
+                                </svg>
+
+                                Reschedule
+
+                            </button>
+
+                        @endunless
+
+
+                        {{-- Cancel --}}
+                        @unless (in_array($appointment->status, ['completed', 'cancelled']))
+
+                            <form method="POST"
+                                  action="{{ route('registrar.appointments.cancel', $appointment) }}"
+                                  data-confirm="This will cancel the student's appointment and notify them."
+                                  data-confirm-ok="Yes, cancel it">
+
+                                @csrf
+
+                                <button type="submit"
+                                        class="inline-flex items-center gap-2
+                                               px-4 py-2.5 rounded-xl
+                                               bg-white border border-red-200
+                                               text-red-600 text-xs font-bold
+                                               hover:bg-red-50 transition">
+
+                                    <svg class="w-4 h-4" fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M6 18L18 6M6 6l12 12"/>
+
+                                    </svg>
+
+                                    Cancel Appointment
+
+                                </button>
+
+                            </form>
+
+                        @endunless
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- =========================================================
+                MAIN CONTENT
+            ========================================================== --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+
+                {{-- =====================================================
+                    LEFT / MAIN
+                ====================================================== --}}
+                <div class="lg:col-span-2 space-y-6">
+
+
+                    {{-- =================================================
+                        CURRENT SCHEDULE
+                    ================================================== --}}
+                    <div class="relative overflow-hidden
+                                bg-gradient-to-br from-blue-900
+                                via-blue-800 to-indigo-900
+                                rounded-3xl shadow-lg">
+
+                        <div class="absolute -right-16 -top-16
+                                    w-48 h-48 rounded-full bg-white/5"></div>
+
+                        <div class="absolute -right-10 -bottom-20
+                                    w-56 h-56 rounded-full bg-white/5"></div>
+
+
+                        <div class="relative p-7">
+
+                            <div class="flex items-center gap-2 mb-6">
+
+                                <div class="w-9 h-9 rounded-xl bg-white/10
+                                            flex items-center justify-center">
+
+                                    <svg class="w-5 h-5 text-white"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M8 7V3m8 4V3m-9 4h10M5 21h14a2 2 0 002-2V8a2 2 0 00-2-2v11a2 2 0 002 2z"/>
+
+                                    </svg>
+
+                                </div>
+
+                                <p class="text-xs font-bold uppercase
+                                          tracking-widest text-blue-100">
+                                    Current Schedule
+                                </p>
+
+                            </div>
+
+
+                            <div class="grid sm:grid-cols-2 gap-6">
+
+                                <div>
+
+                                    <p class="text-xs text-blue-200">
+                                        Appointment Date
+                                    </p>
+
+                                    <p class="text-2xl font-extrabold
+                                              text-white mt-1">
+
+                                        {{ $appointment->date->format('F j, Y') }}
+
+                                    </p>
+
+                                </div>
+
+
+                                <div>
+
+                                    <p class="text-xs text-blue-200">
+                                        Time Slot
+                                    </p>
+
+                                    <p class="text-2xl font-extrabold
+                                              text-white mt-1">
+
+                                        {{ $appointment->time_slot }}
+
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="grid sm:grid-cols-2 gap-6 mt-6
+                                        pt-5 border-t border-white/10">
+
+                                <div>
+
+                                    <p class="text-xs text-blue-200">
+                                        Office
+                                    </p>
+
+                                    <p class="text-sm font-bold text-white mt-1">
+                                        {{ $appointment->office }}
+                                    </p>
+
+                                </div>
+
+                                <div>
+
+                                    <p class="text-xs text-blue-200">
+                                        Capacity
+                                    </p>
+
+                                    <p class="text-sm font-bold text-white mt-1">
+                                        {{ \App\Models\Appointment::SLOT_LIMITS[$appointment->office] ?? 6 }}
+                                        students per slot
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =================================================
+                        APPOINTMENT DETAILS
+                    ================================================== --}}
+                    <div class="bg-white rounded-3xl border border-slate-200
+                                shadow-sm overflow-hidden">
+
+                        <div class="px-6 py-5 border-b border-slate-100">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="w-10 h-10 rounded-xl bg-blue-50
+                                            flex items-center justify-center">
+
+                                    <svg class="w-5 h-5 text-blue-700"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
+
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l5 5v11a2 2 0 01-2 2z"/>
+
+                                    </svg>
+
+                                </div>
+
+                                <div>
+
+                                    <h2 class="font-bold text-slate-900">
+                                        Appointment Details
+                                    </h2>
+
+                                    <p class="text-xs text-slate-400 mt-0.5">
+                                        Information submitted by the student
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="p-6">
+
+                            <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-6">
+
+                                <div>
+                                    <dt class="text-[11px] font-bold uppercase
+                                              tracking-wider text-slate-400">
+                                        Student ID
+                                    </dt>
+
+                                    <dd class="mt-1 text-sm font-semibold text-slate-800">
+                                        {{ $appointment->user->studentProfile?->student_id ?? '—' }}
+                                    </dd>
+                                </div>
+
+
+                                <div>
+                                    <dt class="text-[11px] font-bold uppercase
+                                              tracking-wider text-slate-400">
+                                        Email Address
+                                    </dt>
+
+                                    <dd class="mt-1 text-sm font-semibold text-slate-800 break-all">
+                                        {{ $appointment->user->email }}
+                                    </dd>
+                                </div>
+
+
+                                <div>
+                                    <dt class="text-[11px] font-bold uppercase
+                                              tracking-wider text-slate-400">
+                                        Target Office
+                                    </dt>
+
+                                    <dd class="mt-1 text-sm font-semibold text-slate-800">
+                                        {{ $appointment->office }}
+                                    </dd>
+                                </div>
+
+
+                                <div>
+                                    <dt class="text-[11px] font-bold uppercase
+                                              tracking-wider text-slate-400">
+                                        Purpose
+                                    </dt>
+
+                                    <dd class="mt-1 text-sm font-semibold text-slate-800">
+                                        {{ $appointment->purpose }}
+                                    </dd>
+                                </div>
+
+
+                                @if ($appointment->notes)
+
+                                    <div class="sm:col-span-2">
+
+                                        <dt class="text-[11px] font-bold uppercase
+                                                  tracking-wider text-slate-400">
+                                            Student Notes
+                                        </dt>
+
+                                        <dd class="mt-2 p-4 bg-slate-50
+                                                   rounded-xl text-sm
+                                                   text-slate-600 leading-relaxed">
+                                            {{ $appointment->notes }}
+                                        </dd>
+
+                                    </div>
+
+                                @endif
+
+                            </dl>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =================================================
+                        RESCHEDULE HISTORY
+                    ================================================== --}}
+                    @if ($appointment->rescheduled_at)
+
+                        <div class="bg-white rounded-3xl border border-indigo-100
+                                    shadow-sm overflow-hidden">
+
+                            <div class="px-6 py-5 bg-indigo-50
+                                        border-b border-indigo-100">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div class="w-10 h-10 rounded-xl bg-white
+                                                flex items-center justify-center">
+
+                                        <svg class="w-5 h-5 text-indigo-700"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             viewBox="0 0 24 24">
+
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M12 8v4l3 2"/>
+
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  stroke-width="2"
+                                                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+
+                                        </svg>
+
+                                    </div>
+
+                                    <div>
+
+                                        <h2 class="font-bold text-indigo-900">
+                                            Reschedule History
+                                        </h2>
+
+                                        <p class="text-xs text-indigo-600 mt-0.5">
+                                            Previous appointment information
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="p-6">
+
+                                <div class="relative pl-7">
+
+                                    <div class="absolute left-2 top-1 bottom-1
+                                                w-px bg-indigo-200"></div>
+
+                                    <div class="absolute left-0 top-1
+                                                w-5 h-5 rounded-full
+                                                bg-indigo-100 border-4
+                                                border-white ring-1
+                                                ring-indigo-200"></div>
+
+
+                                    <p class="text-xs font-bold uppercase
+                                              tracking-wider text-slate-400">
+                                        Rescheduled
+                                    </p>
+
+                                    <p class="text-sm text-slate-700 mt-2 leading-relaxed">
+
+                                        Moved from
+
+                                        <strong class="text-slate-900">
+                                            {{ $appointment->original_date?->format('F j, Y') }}
+                                            ·
+                                            {{ $appointment->original_time_slot ?? '—' }}
+                                        </strong>
+
+                                        to
+
+                                        <strong class="text-indigo-700">
+                                            {{ $appointment->date->format('F j, Y') }}
+                                            ·
+                                            {{ $appointment->time_slot }}
+                                        </strong>
+
+                                    </p>
+
+                                    <p class="text-xs text-slate-400 mt-2">
+                                        {{ $appointment->rescheduled_at->format('M j, Y g:i A') }}
+                                    </p>
+
+                                    @if ($appointment->reschedule_reason)
+
+                                        <div class="mt-4 p-4 rounded-xl bg-indigo-50">
+
+                                            <p class="text-[11px] font-bold uppercase
+                                                      tracking-wider text-indigo-500">
+                                                Reason
+                                            </p>
+
+                                            <p class="text-sm text-indigo-800 mt-1">
+                                                {{ $appointment->reschedule_reason }}
+                                            </p>
+
+                                        </div>
+
+                                    @endif
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    @endif
+
+                </div>
+
+
+                {{-- =====================================================
+                    RIGHT SIDEBAR
+                ====================================================== --}}
+                <div class="space-y-6">
+
+
+                    {{-- Appointment Summary --}}
+                    <div class="bg-white rounded-3xl border border-slate-200
+                                shadow-sm overflow-hidden">
+
+                        <div class="px-5 py-4 border-b border-slate-100">
+
+                            <p class="text-xs font-bold uppercase
+                                      tracking-wider text-slate-400">
+                                Appointment Summary
+                            </p>
+
+                        </div>
+
+                        <div class="p-5 space-y-4">
+
+                            <div>
+                                <p class="text-xs text-slate-400">
+                                    Reference Number
+                                </p>
+
+                                <p class="text-sm font-bold text-slate-800 mt-1">
+                                    {{ $appointment->reference_code }}
+                                </p>
+                            </div>
+
+
+                            <div>
+                                <p class="text-xs text-slate-400">
+                                    Office
+                                </p>
+
+                                <p class="text-sm font-bold text-slate-800 mt-1">
+                                    {{ $appointment->office }}
+                                </p>
+                            </div>
+
+
+                            <div>
+                                <p class="text-xs text-slate-400">
+                                    Purpose
+                                </p>
+
+                                <p class="text-sm font-bold text-slate-800 mt-1">
+                                    {{ $appointment->purpose }}
+                                </p>
+                            </div>
+
+
+                            <div class="pt-4 border-t border-slate-100">
+
+                                <p class="text-xs text-slate-400">
+                                    Slot Capacity
+                                </p>
+
+                                <div class="flex items-center justify-between mt-2">
+
+                                    <span class="text-sm font-bold text-slate-800">
+                                        Maximum
+                                    </span>
+
+                                    <span class="px-2.5 py-1 rounded-lg
+                                                 bg-blue-50 text-blue-700
+                                                 text-xs font-bold">
+
+                                        {{ \App\Models\Appointment::SLOT_LIMITS[$appointment->office] ?? 6 }}
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- Email Notification --}}
+                    <div class="bg-blue-50 rounded-3xl border border-blue-100 p-5">
+
+                        <div class="flex gap-3">
+
+                            <div class="w-10 h-10 rounded-xl bg-white
+                                        flex items-center justify-center shrink-0">
+
+                                <svg class="w-5 h-5 text-blue-700"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     viewBox="0 0 24 24">
+
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+
+                                </svg>
+
+                            </div>
+
+                            <div>
+
+                                <p class="text-sm font-bold text-blue-900">
+                                    Student Notifications
+                                </p>
+
+                                <p class="text-xs text-blue-700 mt-1 leading-relaxed">
+                                    The student will receive an email when the
+                                    appointment is approved, rescheduled,
+                                    or cancelled.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- =========================================================
+                ERROR
+            ========================================================== --}}
+            @if (session('error'))
+
+                <div class="mt-6 flex items-start gap-3 bg-red-50
+                            border border-red-200 text-red-700
+                            rounded-2xl px-5 py-4">
+
+                    <svg class="w-5 h-5 mt-0.5 shrink-0"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 9v2m0 4h.01M10.29 3.86l-7.82 14a1 1 0 00.87 1.5h17.32a1 1 0 00.87-1.5l-7.82-14a1 1 0 00-1.74 0z"/>
+
+                    </svg>
+
+                    <p class="text-sm font-semibold">
+                        {{ session('error') }}
+                    </p>
+
+                </div>
+
+            @endif
+
+        </div>
+    </div>
+
+    @include('registrar.appointments.partials.reschedule-modal')
+
+</x-app-layout>

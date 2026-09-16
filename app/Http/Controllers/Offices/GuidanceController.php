@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Http\Controllers\Offices;
+
+use App\Http\Controllers\Controller;
+use Illuminate\View\View;
+
+class GuidanceController extends Controller
+{
+    public function dashboard(): View
+    {
+        return view('Offices.Guidance.dashboard', [
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function appointments(): View
+    {
+        return view('Offices.Guidance.appointments', [
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function availability(): View
+    {
+        return view('Offices.Guidance.availability', [
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function qrScanner(): View
+    {
+        return view('Offices.Guidance.qr', [
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function consultations(): View
+    {
+        return view('Offices.Guidance.consultations', [
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function profile(): View
+    {
+        return view('Offices.Guidance.profile', [
+            'user' => auth()->user(),
+            'office' => 'Guidance',
+        ]);
+    }
+
+    public function help(): View
+    {
+        return view('Offices.Guidance.help', [
+            'office' => 'Guidance',
+        ]);
+    }
+}

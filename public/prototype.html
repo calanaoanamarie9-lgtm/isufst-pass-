@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISUFSTPASS — Interactive Prototype</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;background:#eef2f7;color:#1f2937}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+/* ---------- Prototype bar ---------- */
+.proto-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:#0b1f4b;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:3px solid #facc15}
+.proto-bar .brand{font-weight:800;font-size:14px;letter-spacing:.5px}
+.proto-bar .brand span{color:#facc15}
+.proto-bar .hint{font-size:11px;color:#bfdbfe}
+.proto-bar .accounts{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.proto-bar .accounts button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600}
+.proto-bar .accounts button:hover{background:#facc15;color:#0b1f4b}
+</style>
+<style id="protoCSS">
+/* ---------- App chrome ---------- */
+#app{display:none;min-height:100vh;padding-top:56px}
+.screen{display:none}
+.screen.active{display:block}
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:250px;min-height:100vh;background:#0b1f4b;color:#dbe6ff;flex-shrink:0;padding:18px 14px}
+.sidebar h4{font-size:10px;letter-spacing:1.5px;color:#7f99d6;text-transform:uppercase;margin:16px 6px 6px}
+.sidebar a{display:block;padding:10px 12px;border-radius:8px;font-size:13px;font-weight:600;color:#cdd9f5;margin-bottom:2px}
+.sidebar a:hover{background:rgba(255,255,255,.08)}
+.sidebar a.active{background:#1e3a8a;color:#fff}
+.content{flex:1;padding:26px 30px;max-width:1000px}
+.page-title{font-size:24px;font-weight:800}
+.page-sub{font-size:13px;color:#6b7280;margin-top:4px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);padding:20px;margin-top:18px}
+.card-title{font-weight:700;font-size:15px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px}
+.stat .num{font-size:28px;font-weight:800;margin-top:6px}
+.stat .lbl{font-size:12px;color:#6b7280}
+.blue{color:#1e3a8a}.green{color:#16a34a}.amber{color:#d97706}.red{color:#dc2626}.gray{color:#6b7280}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;color:#475569;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e5e7eb}
+td{padding:11px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:hover td{background:#f8fafc}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.pending{background:#fef9c3;color:#854d0e}
+.badge.processing{background:#dbeafe;color:#1e40af}
+.badge.ready{background:#dcfce7;color:#166534}
+.badge.completed{background:#e0e7ff;color:#3730a3}
+.badge.paid{background:#dcfce7;color:#166534}
+.badge.unpaid{background:#fee2e2;color:#991b1b}
+.badge.rejected{background:#fee2e2;color:#991b1b}
+.badge.confirmed{background:#dcfce7;color:#166534}
+.btn{display:inline-block;background:#1e3a8a;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700}
+.btn:hover{background:#172e72}
+.btn.ghost{background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a}
+.btn.gray{background:#eef2f7;color:#374151}
+.btn.sm{padding:6px 10px;font-size:12px}
+.input{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;margin-top:5px}
+.label{font-size:12px;font-weight:700;color:#374151;margin-top:14px;display:block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qr{margin:0 auto;width:150px;height:150px;background:#fff;border:1px solid #d1d5db;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:1fr;padding:6px;background:#f9fafb}
+.qr i{background:#111827;border-radius:1px}
+.qr i.o{background:#f9fafb}
+.center{text-align:center}
+.tabs{display:flex;gap:8px;margin-top:16px}
+.tab{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;color:#6b7280}
+.tab.active{background:#1e3a8a;color:#fff;border-color:#1e3a8a}
+.kv{font-size:13px;color:#6b7280;margin-top:4px}
+.check{color:#16a34a;font-weight:800}
+.note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#1e40af;margin-top:16px}
+.modal-bg{position:fixed;inset:0;background:rgba(11,31,75,.5);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:26px;max-width:420px;width:100%;text-align:center}
+.modal .em{font-size:44px}
+</style>
+</head>
+<body>
+
+<!-- ======= PROTOTYPE BAR ======= -->
+<div class="proto-bar">
+  <div class="brand">ISUFST<span>PASS</span></div>
+  <div class="hint">Interactive prototype — from register/login hanggang lahat ng accounts</div>
+  <div class="accounts">
+    <button onclick="quickLogin('student')">🎓 Student</button>
+    <button onclick="quickLogin('registrar')">🗂 C.Records</button>
+    <button onclick="quickLogin('dept')">🏢 CICI</button>
+    <button onclick="quickLogin('dept')">🌾 COAG</button>
+    <button onclick="quickLogin('dept')">🎓 COED</button>
+    <button onclick="quickLogin('cashier')">💳 Cashier</button>
+    <button onclick="quickLogin('admin')">🛠 Admin</button>
+  </div>
+</div>
+
+<!-- ======= LOGIN ======= -->
+<div class="screen active" id="scr-login">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0b1f4b,#1e3a8a);padding-top:56px">
+    <div style="background:#fff;border-radius:18px;padding:38px 40px;width:400px;box-shadow:0 20px 50px rgba(0,0,0,.35)">
+      <div class="center" style="margin-bottom:18px">
+        <div style="font-size:26px;font-weight:800;color:#0b1f4b">ISUFST<span style="color:#facc15">PASS</span></div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px">QR Code-Based Transaction Management System</div>
+      </div>
+      <label class="label">Email Address</label>
+      <input class="input" type="email" placeholder="juan.delacruz@student.isufst.edu.ph">
+      <label class="label">Password</label>
+      <input class="input" type="password" placeholder="••••••••">
+      <button class="btn" style="width:100%;margin-top:20px" onclick="login()">Log In</button>
+      <div class="center" style="margin-top:16px;font-size:13px;color:#6b7280">
+        Wala ka pang account? <a href="#" style="color:#1e3a8a;font-weight:700" onclick="go('scr-register');return false">Register here</a>
+      </div>
+      <div class="note">Demo accounts: gamitin ang colored buttons sa taas para mag-login agad.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= REGISTER ======= -->
+<div class="screen" id="scr-register">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0b1f4b,#1e3a8a);padding:56px 20px">
+    <div style="background:#fff;border-radius:18px;padding:32px 38px;width:520px;box-shadow:0 20px 50px rgba(0,0,0,.35)">
+      <div class="center" style="margin-bottom:12px">
+        <div style="font-size:22px;font-weight:800;color:#0b1f4b">Create Student Account</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px">Iloilo State University of Fisheries Science and Technology</div>
+      </div>
+      <label class="label">Full Name</label>
+      <input class="input" placeholder="Dela Cruz, Juan Miguel">
+      <div class="row2">
+        <div><label class="label">Email Address</label><input class="input" placeholder="juan.delacruz@student.isufst.edu.ph"></div>
+        <div><label class="label">ID Number</label><input class="input" placeholder="2024-012345"></div>
+      </div>
+      <label class="label">College / Course</label>
+      <select class="input"><option>BSCS — College of Informatics and Computing Innovations</option><option>BSED — College of Education</option><option>BS Agribusiness — College of Agriculture</option><option>BSBA — CBMSD</option></select>
+      <div class="row2">
+        <div><label class="label">Password</label><input class="input" type="password" placeholder="••••••••"></div>
+        <div><label class="label">Confirm Password</label><input class="input" type="password" placeholder="••••••••"></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:20px" onclick="registered()">Create Account</button>
+      <div class="center" style="margin-top:14px;font-size:13px">
+        <a href="#" onclick="go('scr-login');return false" style="color:#1e3a8a;font-weight:700">← Back to Log In</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= LOGIN/REGISTER MODAL ======= -->
+<div class="modal-bg" id="modal-login"><div class="modal"><div class="em">✅</div><h2 style="margin:8px 0 6px">Logged In Successfully</h2><p style="font-size:13px;color:#6b7280" id="modal-login-msg"></p><button class="btn sm" style="margin-top:16px" onclick="closeModal('modal-login')">Continue</button></div></div>
+<div class="modal-bg" id="modal-reg"><div class="modal"><div class="em">🎉</div><h2 style="margin:8px 0 6px">Account Created</h2><p style="font-size:13px;color:#6b7280">Verification email sent. Demo: dire-diretso ka na sa Student Dashboard.</p><button class="btn sm" style="margin-top:16px" onclick="closeModal('modal-reg');enterStudent()">Go to Dashboard</button></div></div>
+
+<!-- ======= THE APP ======= -->
+<div id="app">
+  <div class="layout" id="layout">
+
+    <!-- SIDEBAR (rendered per role) -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <!-- CONTENT -->
+    <div class="content" id="content">
+      <div class="screen" id="dash-student"><div class="page-title">Student Dashboard</div><div class="page-sub">Juan Miguel Dela Cruz &middot; BSCS-3 &middot; 2024-012345</div>
+        <div class="grid3">
+          <div class="stat"><div class="lbl">Active Document Requests</div><div class="num blue">2</div></div>
+          <div class="stat"><div class="lbl">Pending Payment</div><div class="num amber">1</div></div>
+          <div class="stat"><div class="lbl">Upcoming Appointments</div><div class="num green">3</div></div>
+        </div>
+        <div class="card"><div class="card-title">Recent Activity</div>
+          <table><tr><th>Transaction</th><th>Type</th><th>Status</th><th>Date</th></tr>
+            <tr><td>REQ-2026-00123</td><td>Document Request</td><td><span class="badge pending">Pending Payment</span></td><td>Sep 05, 2026</td></tr>
+            <tr><td>APT-2026-00451</td><td>Appointment — CICI</td><td><span class="badge confirmed">Confirmed</span></td><td>Sep 08, 2026</td></tr>
+            <tr><td>REQ-2026-00118</td><td>Document Request</td><td><span class="badge ready">Ready for Pickup</span></td><td>Sep 02, 2026</td></tr>
+          </table>
+        </div>
+        <div class="note">💡 Quick: bisitahin ang <b>New Request</b> para mag-book ng document o appointment.</div>
+      </div>
+
+      <div class="screen" id="scr-new"><div class="page-title">New Request</div><div class="page-sub">Piliin kung ano ang gusto mong i-request.</div>
+        <div class="tabs"><span class="tab active">📂 Document Request</span><span class="tab">📅 Appointment</span></div>
+        <div class="card">
+          <div class="card-title">Request Document</div>
+          <label class="label">Document Type</label>
+          <select class="input">
+            <option>Transcript of Record</option><option>Diploma</option><option>Certificate of Graduation (COG)</option><option>Certificate of Good Moral Character</option><option>Transfer Credentials / Honorable Dismissal</option><option>Certification / CAV</option><option>Permanent Record (F-137-A)</option><option>Others…</option>
+          </select>
+          <label class="label">Purpose of Request</label>
+          <select class="input"><option>Employment</option><option>Further Studies / Transfer</option><option>Scholarship</option><option>Licensure Exam</option><option>Personal / Other</option></select>
+          <label class="label">Mode of Claiming</label>
+          <select class="input"><option>Personal Claim</option><option>Representative Claim</option></select>
+          <label class="label">Number of Copies</label>
+          <input class="input" type="number" value="1">
+          <div class="note">Estimated fee: <b>₱100.00</b> per copy + service charge. Bayaran sa University Cashier.</div>
+          <button class="btn" style="margin-top:16px" onclick="go('scr-mydocs')">Submit Request →</button>
+        </div>
+      </div>
+
+      <div class="screen" id="scr-mydocs"><div class="page-title">My Requests &amp; Status</div><div class="page-sub">Kasaysayan at progreso ng iyong mga dokumento.</div>
+        <div class="card">
+          <table>
+            <tr><th>Transaction No.</th><th>Document</th><th>Fee</th><th>Status</th><th>Updated</th></tr>
+            <tr><td>REQ-2026-00123</td><td>Transcript of Record</td><td>₱100.00</td><td><span class="badge pending">Pending Payment</span></td><td>Sep 05</td></tr>
+            <tr><td>REQ-2026-00118</td><td>Certificate of Good Moral</td><td>₱100.00</td><td><span class="badge ready">Ready for Pickup</span></td><td>Sep 02</td></tr>
+            <tr><td>REQ-2026-00104</td><td>Diploma</td><td>₱250.00</td><td><span class="badge completed">Completed</span></td><td>Aug 28</td></tr>
+          </table>
+        </div>
+        <button class="btn" style="margin-top:16px" onclick="go('scr-qr')">🎫 View Claim Slip &amp; QR Code</button>
+      </div>
+
+      <div class="screen" id="scr-qr"><div class="page-title">Digital Student ID / QR Pass</div><div class="page-sub">I-present ito sa guard o registrar para sa check-in at claiming.</div>
+        <div class="card center" style="max-width:380px">
+          <table style="margin-bottom:14px"><tr><td class="g">Name</td><td><b>Juan Miguel Dela Cruz</b></td></tr><tr><td>ID No.</td><td>2024-012345</td></tr><tr><td>Status</td><td><span class="badge ready">Active Student</span></td></tr></table>
+          <div class="qr" id="qrdoc"></div>
+          <div class="kv" style="margin-top:10px">QR Token: DOC-R20260905-00123</div>
+          <button class="btn sm" style="margin-top:12px" onclick="dl()">⬇ Download QR</button>
+        </div>
+      </div>
+
+      <div class="screen" id="scr-myapt"><div class="page-title">My Appointments</div><div class="page-sub">Mga naka-book mong consultations at transactions.</div>
+        <div class="card"><table>
+          <tr><th>Reference</th><th>Office</th><th>Purpose</th><th>Date</th><th>Time</th><th>Status</th></tr>
+          <tr><td>APT-2026-00451</td><td>CICI</td><td>Capstone Consultation</td><td>Sep 08</td><td>09:00 AM</td><td><span class="badge confirmed">Confirmed</span></td></tr>
+          <tr><td>APT-2026-00432</td><td>Registrar</td><td>Document Follow-up</td><td>Sep 04</td><td>01:30 PM</td><td><span class="badge completed">Completed</span></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="scr-notifs"><div class="page-title">Notifications</div><div class="page-sub">Email at system alerts.</div>
+        <div class="card">
+          <div style="padding:12px;border:1px solid #dbeafe;background:#eff6ff;border-radius:10px;margin-bottom:8px"><b>🔔 Payment received</b><div class="kv">Sep 06, 2026 — Na-verify ang iyong bayad para sa REQ-2026-00123.</div></div>
+          <div style="padding:12px;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:8px"><b>📅 Appointment confirmed</b><div class="kv">Sep 05, 2026 — CICI Capstone Consultation, Sep 08 09:00 AM.</div></div>
+          <div style="padding:12px;border:1px solid #e5e7eb;border-radius:10px"><b>📂 Ready for pickup</b><div class="kv">Sep 02, 2026 — TOR ready na. Dalhin ang QR pass.</div></div>
+        </div>
+      </div>
+
+      <div class="screen" id="scr-profile"><div class="page-title">Profile Settings</div><div class="page-sub">Account at personal information.</div>
+        <div class="card" style="max-width:500px"><label class="label">Full Name</label><input class="input" value="Dela Cruz, Juan Miguel"><label class="label">Email</label><input class="input" value="juan.delacruz@student.isufst.edu.ph"><label class="label">ID Number</label><input class="input" value="2024-012345"><label class="label">Contact No.</label><input class="input" value="+63 912 345 6789"><button class="btn sm" style="margin-top:16px">Save Changes</button></div>
+      </div>
+
+      <div class="screen" id="dash-reg"><div class="page-title">Registrar Dashboard</div><div class="page-sub">Office of the Registrar — Admission &amp; Student Records</div>
+        <div class="grid3">
+          <div class="stat"><div class="lbl">Pending Review</div><div class="num amber">18</div></div>
+          <div class="stat"><div class="lbl">Awaiting Payment</div><div class="num red">9</div></div>
+          <div class="stat"><div class="lbl">Ready for Pickup</div><div class="num green">6</div></div>
+        </div>
+        <div class="card"><div class="card-title">Today's Pipeline</div><table><tr><th>Transaction</th><th>Student</th><th>Document</th><th>Status</th><th></th></tr>
+          <tr><td>REQ-2026-00123</td><td>Dela Cruz, Juan</td><td>TOR</td><td><span class="badge pending">Pending Review</span></td><td><button class="btn sm gray">Approve</button> <button class="btn sm blue">Forward</button></td></tr>
+          <tr><td>REQ-2026-00122</td><td>Padios, Mayflor</td><td>Certification</td><td><span class="badge processing">Processing</span></td><td><button class="btn sm gray">Update</button></td></tr>
+          <tr><td>REQ-2026-00118</td><td>Santos, Maria</td><td>COG</td><td><span class="badge ready">Ready for Pickup</span></td><td><button class="btn sm ghost">Print Slip</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="reg-docs"><div class="page-title">Document Requests</div><div class="page-sub">Incoming requests and status pipeline.</div>
+        <div class="tabs"><span class="tab active">📥 Incoming</span><span class="tab">📂 Manage / Archive</span></div>
+        <div class="card"><table>
+          <tr><th>Transaction No.</th><th>Student</th><th>Document(s)</th><th>Status</th><th>Action</th></tr>
+          <tr><td>REQ-2026-00123</td><td>Dela Cruz, Juan</td><td>TOR (1)</td><td><span class="badge pending">Pending Review</span></td><td><button class="btn sm">View</button></td></tr>
+          <tr><td>REQ-2026-00122</td><td>Padios, Mayflor</td><td>Certification (2)</td><td><span class="badge processing">Processing</span></td><td><button class="btn sm">View</button></td></tr>
+          <tr><td>REQ-2026-00118</td><td>Santos, Maria</td><td>COG (1)</td><td><span class="badge ready">Ready for Pickup</span></td><td><button class="btn sm">View</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="reg-fees"><div class="page-title">Document Fees &amp; Services</div><div class="page-sub">I-manage ang pricing ng mga serbisyo.</div>
+        <div class="card"><table><tr><th>Document</th><th>Fee</th><th>Active</th></tr>
+          <tr><td>Transcript of Record</td><td>₱100.00</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Diploma</td><td>₱250.00</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Certification / CAV</td><td>₱100.00</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Service Charge</td><td>₱100.00</td><td><span class="badge paid">Active</span></td></tr>
+        </table><button class="btn sm" style="margin-top:14px">+ Add Document</button></div>
+      </div>
+
+      <div class="screen" id="reg-apt"><div class="page-title">Appointments Management</div><div class="page-sub">Student visits at queue.</div>
+        <div class="card"><table><tr><th>Ref</th><th>Student</th><th>Purpose</th><th>Date / Time</th><th>Status</th><th>Action</th></tr>
+          <tr><td>APT-00451</td><td>Dela Cruz, Juan</td><td>Document Follow-up</td><td>Sep 08 10:00 AM</td><td><span class="badge pending">Pending</span></td><td><button class="btn sm">Confirm</button></td></tr>
+          <tr><td>APT-00448</td><td>Padios, Mayflor</td><td>TOR Claiming</td><td>Sep 07 01:00 PM</td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn sm gray">Mark Done</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="reg-avail"><div class="page-title">Availability</div><div class="page-sub">Manage dates at time slots.</div>
+        <div class="card"><table><tr><th>Date</th><th>Day</th><th>Slots (AM)</th><th>Slots (PM)</th><th>Action</th></tr>
+          <tr><td>Sep 08, 2026</td><td>Tuesday</td><td><span class="badge paid">Open — 12</span></td><td><span class="badge paid">Open — 10</span></td><td><button class="btn sm gray">Block Slot</button></td></tr>
+          <tr><td>Sep 09, 2026</td><td>Wednesday</td><td><span class="badge pending">Full</span></td><td><span class="badge paid">Open — 8</span></td><td><button class="btn sm gray">Block Slot</button></td></tr>
+        </table><button class="btn sm" style="margin-top:14px">+ Open New Date</button></div>
+      </div>
+
+      <div class="screen" id="reg-qr"><div class="page-title">QR Pass Verification</div><div class="page-sub">I-scan ang student pass para sa check-in.</div>
+        <div class="card center" style="max-width:380px"><div class="qr" id="qrscan"></div><div class="page-sub" style="margin-top:10px">Camera preview (mock)</div><button class="btn sm" style="margin-top:14px">📷 Start Scanner</button>
+        <div class="note">✅ Scanned: Juan Dela Cruz — <b>Appointment Confirmed</b></div></div>
+      </div>
+
+      <div class="screen" id="dash-dept"><div class="page-title" id="dept-title">CICI Department Dashboard</div><div class="page-sub" id="dept-sub">Department consultations at college transactions.</div>
+        <div class="grid3">
+          <div class="stat"><div class="lbl">Total Appointments</div><div class="num blue">24</div></div>
+          <div class="stat"><div class="lbl">Today Check-ins</div><div class="num green">9</div></div>
+          <div class="stat"><div class="lbl">Office</div><div class="num amber" id="dept-office">CICI</div></div>
+        </div>
+        <div class="card"><div class="card-title">Recent Appointments</div><table><tr><th>Student</th><th>Purpose</th><th>Date</th><th>Status</th></tr>
+          <tr><td>Dela Cruz, Juan</td><td>Capstone Consultation</td><td>Sep 08</td><td><span class="badge confirmed">Confirmed</span></td></tr>
+          <tr><td>Lopez, Bea</td><td>OJT Advising</td><td>Sep 08</td><td><span class="badge pending">Pending</span></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="dept-qr"><div class="page-title">QR Scanner &amp; Check-in</div><div class="page-sub">I-verify ang appointment pass ng estudyante.</div>
+        <div class="card center" style="max-width:380px"><div class="qr" id="qrscan2"></div><div class="page-sub" style="margin-top:10px">Camera preview (mock)</div><button class="btn sm" style="margin-top:14px">📷 Start Scanner</button>
+        <div class="note">✅ Checked in: Juan Dela Cruz — Capstone Consultation, 09:00 AM</div></div>
+      </div>
+
+      <div class="screen" id="dept-apt"><div class="page-title">Manage Appointments</div><div class="page-sub">Approve, reschedule, o i-cancel ang appointments.</div>
+        <div class="card"><table><tr><th>Student</th><th>Purpose</th><th>Date / Time</th><th>Status</th><th>Action</th></tr>
+          <tr><td>Lopez, Bea</td><td>OJT Advising</td><td>Sep 09 02:00 PM</td><td><span class="badge pending">Pending</span></td><td><button class="btn sm">Approve</button></td></tr>
+          <tr><td>Dela Cruz, Juan</td><td>Capstone</td><td>Sep 08 09:00 AM</td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn sm gray">Reschedule</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="dept-cons"><div class="page-title">Consultation Services</div><div class="page-sub">I-configure ang appointment types ng department.</div>
+        <div class="card"><table><tr><th>Service Type</th><th>Mins</th><th>Active</th></tr>
+          <tr><td>Capstone Consultation</td><td>30</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>OJT Advising</td><td>20</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Academic Advising</td><td>20</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Research Guidance</td><td>30</td><td><span class="badge paid">Active</span></td></tr>
+        </table><button class="btn sm" style="margin-top:14px">+ Add Service</button></div>
+      </div>
+
+      <div class="screen" id="dept-avail"><div class="page-title">Time Slot Settings</div><div class="page-sub">Araw, oras ng pagbubukas, at slot limits.</div>
+        <div class="card"><table><tr><th>Date</th><th>AM Slots</th><th>PM Slots</th><th>Limit</th><th>Action</th></tr>
+          <tr><td>Sep 09, 2026</td><td>8:00–12:00</td><td>1:00–5:00</td><td>20/day</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>Sep 10, 2026</td><td>8:00–12:00</td><td>1:00–5:00</td><td>20/day</td><td><button class="btn sm gray">Edit</button></td></tr>
+        </table><button class="btn sm" style="margin-top:14px">+ Open New Date</button></div>
+      </div>
+
+      <div class="screen" id="dash-cash"><div class="page-title">Cashier Dashboard</div><div class="page-sub">Iloilo State University — Cashier Office</div>
+        <div class="grid3">
+          <div class="stat"><div class="lbl">Today's Collections</div><div class="num green">₱2,900</div></div>
+          <div class="stat"><div class="lbl">Pending Payments</div><div class="num amber">9</div></div>
+          <div class="stat"><div class="lbl">Ready for Pickup</div><div class="num blue">6</div></div>
+        </div>
+        <div class="card"><div class="card-title">Recent Payments</div><table><tr><th>Trans. No.</th><th>Student</th><th>Amount</th><th>Status</th></tr>
+          <tr><td>REQ-2026-00123</td><td>Dela Cruz, Juan</td><td>₱200.00</td><td><span class="badge unpaid">Unpaid</span></td></tr>
+          <tr><td>REQ-2026-00120</td><td>Padios, Mayflor</td><td>₱200.00</td><td><span class="badge paid">Paid</span></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="cash-pay"><div class="page-title">Pending Payments</div><div class="page-sub">Markahan ang bayad kapag na-settle sa counter.</div>
+        <div class="card"><table><tr><th>Trans. No.</th><th>Student</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+          <tr><td>REQ-2026-00123</td><td>Dela Cruz, Juan</td><td>₱200.00</td><td><span class="badge unpaid">Pending</span></td><td><button class="btn sm" onclick="paid()">Mark Paid</button></td></tr>
+          <tr><td>REQ-2026-00121</td><td>Lopez, Bea</td><td>₱100.00</td><td><span class="badge unpaid">Pending</span></td><td><button class="btn sm" onclick="paid()">Mark Paid</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="cash-history"><div class="page-title">Payment History</div><div class="page-sub">Records ng mga bayad na.</div>
+        <div class="card"><table><tr><th>Date</th><th>Trans. No.</th><th>Student</th><th>Amount</th></tr>
+          <tr><td>Sep 06, 2026</td><td>REQ-2026-00120</td><td>Padios, Mayflor</td><td>₱200.00</td></tr>
+          <tr><td>Sep 04, 2026</td><td>REQ-2026-00115</td><td>Santos, Maria</td><td>₱350.00</td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="cash-ledger"><div class="page-title">Student Ledger</div><div class="page-sub">Hanapin ang financial records ng estudyante.</div>
+        <div class="card" style="max-width:520px"><label class="label">Search Student</label><input class="input" placeholder="ID number o pangalan"><button class="btn sm" style="margin-top:12px">Search</button>
+        <table style="margin-top:18px"><tr><th>Date</th><th>Transaction</th><th>Debit</th><th>Credit</th></tr><tr><td>Sep 04</td><td>TOR Request</td><td>₱200.00</td><td>—</td></tr><tr><td>Sep 06</td><td>Payment</td><td>—</td><td>₱200.00</td></tr></table></div>
+      </div>
+
+      <div class="screen" id="dash-admin"><div class="page-title">Admin — System Dashboard</div><div class="page-sub">Overview ng buong system.</div>
+        <div class="grid3">
+          <div class="stat"><div class="lbl">Total Users</div><div class="num blue">1,240</div></div>
+          <div class="stat"><div class="lbl">Active Transactions</div><div class="num amber">86</div></div>
+          <div class="stat"><div class="lbl">Offices</div><div class="num green">10</div></div>
+        </div>
+        <div class="card"><div class="card-title">Offices</div><table><tr><th>Office</th><th>Role</th><th>Status</th></tr>
+          <tr><td>Registrar</td><td>Registrar</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>Cashier</td><td>Cashier</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>CICI Department</td><td>Department</td><td><span class="badge paid">Active</span></td></tr>
+          <tr><td>COAG / COED / CBMSD</td><td>Department</td><td><span class="badge paid">Active</span></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="admin-users"><div class="page-title">User Management</div><div class="page-sub">Manage accounts, roles at permissions.</div>
+        <div class="card"><table><tr><th>Name</th><th>Email</th><th>Role</th><th>Office</th><th>Action</th></tr>
+          <tr><td>Admin Account</td><td>admin@isufst.edu.ph</td><td>Admin</td><td>—</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>Registrar Staff</td><td>registrar@isufst.edu.ph</td><td>Registrar</td><td>Registrar</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>CICI Department</td><td>cici@isufst.edu.ph</td><td>Department</td><td>CICI</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>COAG Department</td><td>coag@isufst.edu.ph</td><td>Department</td><td>COAG</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>COED Department</td><td>coed@isufst.edu.ph</td><td>Department</td><td>COED</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>Cashier Staff</td><td>cashier@isufst.edu.ph</td><td>Cashier</td><td>Cashier</td><td><button class="btn sm gray">Edit</button></td></tr>
+        </table><button class="btn sm" style="margin-top:14px">+ Add User</button></div>
+      </div>
+
+      <div class="screen" id="admin-offices"><div class="page-title">Department Settings</div><div class="page-sub">I-configure ang offices.</div>
+        <div class="card"><table><tr><th>Office Code</th><th>Label</th><th>Location</th><th>Action</th></tr>
+          <tr><td>Registrar</td><td>Office of the Registrar</td><td>Main Building</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>CICI</td><td>College of Informatics &amp; Computing Innovations</td><td>CICI Building</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>COAG</td><td>College of Agriculture</td><td>COAG Building</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>COED</td><td>College of Education</td><td>COED Building</td><td><button class="btn sm gray">Edit</button></td></tr>
+          <tr><td>CBMSD</td><td>College of Business, Mgmt &amp; Devt Studies</td><td>CBMSD Building</td><td><button class="btn sm gray">Edit</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="admin-slots"><div class="page-title">Slot Availability &amp; Capacity</div><div class="page-sub">Daily limits at blocked slots.</div>
+        <div class="card"><table><tr><th>Office</th><th>Date</th><th>Limit/Day</th><th>Action</th></tr>
+          <tr><td>Registrar</td><td>Sep 08, 2026</td><td>40</td><td><button class="btn sm gray">Block</button></td></tr>
+          <tr><td>CICI</td><td>Sep 08, 2026</td><td>20</td><td><button class="btn sm gray">Block</button></td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="admin-config"><div class="page-title">System Configuration</div><div class="page-sub">Global settings at institutional details.</div>
+        <div class="card" style="max-width:540px"><label class="label">Institution Name</label><input class="input" value="Iloilo State University of Fisheries Science and Technology"><label class="label">Institution Address</label><input class="input" value="Tiwi, Barotac Nuevo, Iloilo"><label class="label">Current Academic Term</label><input class="input" value="1st Semester AY 2026-2027"><button class="btn sm" style="margin-top:16px">Save</button></div>
+      </div>
+
+      <div class="screen" id="admin-logs"><div class="page-title">Master Logs &amp; Audits</div><div class="page-sub">Audit trails at security logs.</div>
+        <div class="card"><table><tr><th>Time</th><th>User</th><th>Action</th></tr>
+          <tr><td>Sep 07 10:02 AM</td><td>cashier@</td><td>Marked REQ-2026-00120 as Paid</td></tr>
+          <tr><td>Sep 07 09:15 AM</td><td>registrar@</td><td>Approved REQ-2026-00119</td></tr>
+          <tr><td>Sep 06 08:40 AM</td><td>admin@</td><td>Updated Slot Capacity — Registrar</td></tr>
+        </table></div>
+      </div>
+
+      <div class="screen" id="gen"><div class="page-title" id="gen-title">Profile Settings</div><div class="page-sub" id="gen-sub">Manage profile at documentation.</div>
+        <div class="card" style="max-width:540px"><label class="label">Name</label><input class="input" value="Department Staff"><label class="label">Email</label><input class="input" value="staff@isufst.edu.ph"><label class="label">Office</label><input class="input" value="Office"><button class="btn sm" style="margin-top:16px">Save Changes</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentRole = 'student';
+var screens = {
+  student: [ ['dash-student','📊','Dashboard'], ['scr-new','📝','New Request'], ['scr-mydocs','📂','My Requests & Status'], ['scr-myapt','📅','My Appointments'], ['scr-qr','🔲','Digital ID / QR Pass'] ],
+  student2: [ ['scr-notifs','🔔','Notifications'], ['scr-profile','⚙️','Profile Settings'] ],
+  registrar: [ ['dash-reg','📊','Dashboard'], ['reg-docs','📥','Document Requests'], ['reg-fees','⚙️','Document Fees'], ['reg-apt','📅','Appointments'], ['reg-avail','🗓️','Availability'], ['reg-qr','🔲','QR Verification'] ],
+  registrar2: [ ['scr-notifs','🔔','Notifications'], ['gen','⚙️','Profile Settings'] ],
+  dept: [ ['dash-dept','📊','Dashboard'], ['dept-qr','📷','QR Scanner'], ['dept-apt','📅','Appointments'], ['dept-cons','📋','Consultations'], ['dept-avail','🕒','Time Slots'] ],
+  dept2: [ ['gen','⚙️','Profile Settings'] ],
+  cashier: [ ['dash-cash','📊','Dashboard'], ['cash-pay','💳','Pending Payments'], ['cash-history','🧾','Payment History'], ['cash-ledger','🔍','Student Ledger'] ],
+  admin: [ ['dash-admin','📊','Dashboard'], ['admin-users','👥','User Management'], ['admin-offices','🏢','Department Settings'], ['admin-slots','🕐','Slot Capacity'], ['admin-config','⚙️','System Config'], ['admin-logs','🖨️','Audits'] ],
+  admin2: [ ['gen','⚙️','Profile Settings'] ]
+};
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.toggle('active',a.dataset.screen===id));
+}
+function renderSidebar(){
+  var main, acct;
+  if(currentRole==='student'){main=screens.student;acct=screens.student2;}
+  else if(currentRole==='registrar'){main=screens.registrar;acct=screens.registrar2;}
+  else if(currentRole==='dept'){main=screens.dept;acct=screens.dept2;}
+  else if(currentRole==='cashier'){main=screens.cashier;acct=screens.cashier2||[];}
+  else {main=screens.admin;acct=screens.admin2;}
+  var html='<h4>Main Menu</h4>';
+  main.forEach(function(i){html+='<a href="#" data-screen="'+i[0]+'" onclick="go(\''+i[0]+'\');return false">'+i[1]+' '+i[2]+'</a>';});
+  if(acct.length){html+='<h4>Account & Support</h4>';acct.forEach(function(i){html+='<a href="#" data-screen="'+i[0]+'" onclick="go(\''+i[0]+'\');return false">'+i[1]+' '+i[2]+'</a>';});}
+  document.getElementById('sidebar').innerHTML=html;
+}
+function quickLogin(role){
+  currentRole=role;
+  renderSidebar();
+  if(role==='student'){document.getElementById('dash-student').getElementsByClassName('page-sub')[0].textContent='Juan Miguel Dela Cruz · BSCS-3 · 2024-012345';go('dash-student');}
+  else if(role==='registrar'){go('dash-reg');}
+  else if(role==='dept'){go('dash-dept');}
+  else if(role==='cashier'){go('dash-cash');}
+  else {go('dash-admin');}
+  document.getElementById('app').style.display='block';
+  document.getElementById('modal-login-msg').textContent='Nag-log in ka bilang '+role+'. I-explore ang sidebar.';
+  showModal('modal-login');
+}
+function login(){quickLogin('student');}
+function registered(){showModal('modal-reg');}
+function enterStudent(){currentRole='student';renderSidebar();go('dash-student');document.getElementById('app').style.display='block';}
+function showModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function paid(){alert('✅ Marked as Paid — ipagpapatuloy na ang processing.');}
+function dl(){alert('⬇ Simulated download ng QR (SVG/PNG).');}
+function buildQR(id, seed){
+  var el=document.getElementById(id);if(!el)return;var s=el.dataset.s||1;var out='';for(var r=0;r<5;r++)for(var c=0;c<5;c++){var v=((r*7+c*13+seed*seed)%4===0)?'':' o';out+='<i class="'+v.trim()+'"></i>';}el.innerHTML=out;el.dataset.s=(s+1)%9;
+}
+renderSidebar();
+buildQR('qrdoc',3);
+buildQR('qrscan',5);
+buildQR('qrscan2',7);
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Http\Controllers\Department;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class CiciController extends Controller
+{
+    public function dashboard(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        $appointments = \App\Models\Appointment::with('user')
+            ->where('office', $office)
+            ->latest()
+            ->paginate(12);
+
+        return view('departments.CICI.dashboard', [
+            'office' => $office,
+            'appointments' => $appointments,
+        ]);
+    }
+
+    public function appointments(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        $appointments = \App\Models\Appointment::with('user')
+            ->where('office', $office)
+            ->latest()
+            ->paginate(12);
+
+        return view('departments.CICI.appointments', [
+            'office' => $office,
+            'appointments' => $appointments,
+        ]);
+    }
+
+    public function availability(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        $timeSlots = \App\Models\Appointment::TIME_SLOTS;
+
+        return view('departments.CICI.availability', [
+            'office' => $office,
+            'timeSlots' => $timeSlots,
+        ]);
+    }
+
+    public function qrScanner(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        return view('departments.CICI.qr', [
+            'office' => $office,
+        ]);
+    }
+
+    public function consultations(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        return view('departments.CICI.consultations', [
+            'office' => $office,
+        ]);
+    }
+
+    public function profile(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        return view('departments.CICI.profile', [
+            'user' => $user,
+            'office' => $office,
+        ]);
+    }
+
+    public function help(): View
+    {
+        $user = auth()->user();
+        $office = $user->officeScope();
+
+        return view('departments.CICI.help', [
+            'office' => $office,
+        ]);
+    }
+}

@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\AppointmentStatus;
+use App\Support\SlotAvailabilityService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
+class Appointment extends Model
+{
+    public const TIME_SLOTS = [
+        '08:00 AM - 09:00 AM',
+        '09:00 AM - 10:00 AM',
+        '10:00 AM - 11:00 AM',
+        '11:00 AM - 12:00 PM',
+        '01:00 PM - 02:00 PM',
+        '02:00 PM - 03:00 PM',
+        '03:00 PM - 04:00 PM',
+        '04:00 PM - 05:00 PM',
+    ];
+
+    /**
+     * Maximum concurrent bookings per time slot, configurable per office.
+     */
+    public const SLOT_LIMITS = [
+        'OSAS' => 8,
+        'Registrar' => 6,
+        'Guidance' => 8,
+        'Cashier' => 8,
+        'Accounting' => 6,
+        'Admin' => 4,
+    ];
+
+    protected $fillable = [
+        'reference_code',
+        'qr_token',
+        'user_id',
+        'office',
+        'purpose',
+        'date',
+        'original_date',
+        'original_time_slot',
+        'time_slot',
+        'reschedule_reason',
+        'status',
+        'notes',
+        'confirmed_at',
+        'rescheduled_at',
+        'completed_at',
+        'cancelled_at',
+        'reminder_sent_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'date' => 'date',
+            'original_date' => 'date',
+            'confirmed_at' => 'datetime',
+            'rescheduled_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Appointment $appointment) {
+            if (! $appointment->reference_code) {
+                $appointment->reference_code = 'APT-' . now()->format('Y') . '-' . strtoupper(\Illuminate\Support\Str::random(4));
+            }
+
+            if (! $appointment->qr_token) {
+                $appointment->qr_token = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function feedback(): MorphMany
+    {
+        return $this->morphMany(Feedback::class, 'feedbackable');
+    }
+
+    public function isUpcoming(): bool
+    {
+        return in_array($this->status, AppointmentStatus::schedulableValues(), true);
+    }
+
+    public function isCancellable(): bool
+    {
+        return $this->isUpcoming() && $this->date >= Carbon::today();
+    }
+
+    public function isReschedulable(): bool
+    {
+        return $this->isUpcoming() && $this->date > Carbon::today();
+    }
+
+    public function scopeUpcoming(Builder $query): Builder
+    {
+        return $query->whereIn('status', AppointmentStatus::schedulableValues());
+    }
+
+    /**
+     * Remaining available seats for a given office / date / time slot,
+     * driven by the slot availability & capacity rules.
+     * Optionally ignore one appointment (e.g. the one being rescheduled).
+     */
+    public static function remainingSlots(string $office, Carbon|string $date, string $timeSlot, ?int $ignoreId = null): int
+    {
+        return app(SlotAvailabilityService::class)
+            ->checkForOffice($office, $date, $timeSlot, $ignoreId)['remaining'];
+    }
+
+    /**
+     * Full availability view (slots with remaining seats and status)
+     * driven by the slot availability & capacity rules.
+     */
+    public static function availableSlots(string $office, Carbon|string $date, ?int $ignoreId = null): array
+    {
+        return app(SlotAvailabilityService::class)
+            ->availableSlots($office, $date, $ignoreId);
+    }
+}

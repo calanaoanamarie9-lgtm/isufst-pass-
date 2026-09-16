@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] { display: none !important; }
+
+/* Prevent sticky hover states on touch devices (sidebar items)
+   so links never appear "selected" after a tap. */
+@media (hover: none) {
+    aside nav a:hover {
+        background-color: transparent !important;
+    }
+}
