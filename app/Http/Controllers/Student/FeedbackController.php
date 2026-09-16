@@ -71,7 +71,7 @@ class FeedbackController extends Controller
 
         $serviceArea = $validated['kind'] === 'appointment'
             ? $feedbackable->office
-            : $feedbackable->document()->value('name');
+            : $feedbackable->documents->pluck('name')->join(', ');
 
         Auth::user()->feedbacks()->create([
             'feedbackable_type' => get_class($feedbackable),

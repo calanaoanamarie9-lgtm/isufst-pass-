@@ -40,6 +40,11 @@ class AppointmentController extends Controller
         ]);
     }
 
+    public function printAll()
+    {
+        return redirect()->route('registrar.appointments.index');
+    }
+
     /**
      * Availability checker (JSON): open time intervals for an office + date.
      * Excludes the appointment being rescheduled from the count.
