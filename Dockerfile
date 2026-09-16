@@ -1,9 +1,10 @@
 # Stage 1: Build frontend assets with Node
 FROM node:22-alpine AS frontend
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
-COPY . .
+COPY vite.config.js tailwind.config.js postcss.config.js ./
+COPY resources/ resources/
 RUN npm run build
 
 # Stage 2: PHP runtime
