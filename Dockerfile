@@ -31,10 +31,8 @@ RUN npm run build \
     && mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data \
                storage/framework/testing storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
-    && ln -sfn /app/storage/app/public /app/public/storage \
-    && php artisan config:cache \
-    && php artisan view:cache
+    && ln -sfn /app/storage/app/public /app/public/storage
 
 EXPOSE 8000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["sh", "-c", "php artisan config:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
