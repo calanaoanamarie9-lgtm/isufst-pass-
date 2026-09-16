@@ -21,11 +21,11 @@ services:
       - key: DB_HOST
         value: aws-0-ap-southeast-1.pooler.supabase.com
       - key: DB_PORT
-        value: "5432"
+        value: "6543"
       - key: DB_DATABASE
         value: postgres
       - key: DB_USERNAME
-        value: postgres.iuoaerwtemlmfzwjwrsf
+        value: postgres.jvfsvnwauerafldjujiu
       - key: DB_PASSWORD
         sync: false
       - key: DB_SSLMODE
@@ -55,14 +55,14 @@ services:
       - key: MAIL_FROM_NAME
         value: ISUFSTPASS
       - key: SUPABASE_PROJECT_REF
-        value: iuoaerwtemlmfzwjwrsf
+        value: jvfsvnwauerafldjujiu
       - key: S3_REGION
         value: ap-southeast-1
       - key: S3_BUCKET
         value: avatars
       - key: S3_ENDPOINT
-        value: https://iuoaerwtemlmfzwjwrsf.supabase.co/storage/v1/s3
+        value: https://jvfsvnwauerafldjujiu.supabase.co/storage/v1/s3
       - key: S3_PUBLIC_URL
-        value: https://iuoaerwtemlmfzwjwrsf.supabase.co/storage/v1/object/public/avatars
+        value: https://jvfsvnwauerafldjujiu.supabase.co/storage/v1/object/public/avatars
       - key: S3_USE_PATH_STYLE_ENDPOINT
         value: "true"
