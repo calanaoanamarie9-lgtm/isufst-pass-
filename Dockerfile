@@ -6,6 +6,7 @@ RUN apt-get update \
     libpq-dev \
     libzip-dev \
     libicu-dev \
+    libonig-dev \
     unzip \
     git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
