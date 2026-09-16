@@ -39,7 +39,7 @@ LABEL "org.opencontainers.image.description"="ISUFSTPASS - QR Code-Based Documen
 # PHP extensions required at runtime:
 #   pdo_pgsql - Supabase PostgreSQL driver (pdo_mysql NOT needed in production)
 #   gd        - QR logo rasterization (app/Support/QrPassCard.php)
-RUN install-php-extensions pdo_pgsql gd
+RUN install-php-extensions pdo_pgsql gd intl bcmath mbstring
 
 # ---------- Application ----------
 WORKDIR /app
