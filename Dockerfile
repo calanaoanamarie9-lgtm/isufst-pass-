@@ -1,22 +1,26 @@
 FROM php:8.3-cli
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gnupg \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    git \
+    unzip \
     libpq-dev \
     libzip-dev \
     libicu-dev \
     libonig-dev \
-    unzip \
-    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_pgsql gd intl bcmath mbstring zip opcache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
@@ -31,8 +35,7 @@ COPY . .
 RUN npm run build \
     && mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data \
                storage/framework/testing storage/logs bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache \
-    && ln -sfn /app/storage/app/public /app/public/storage
+    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8000
 
