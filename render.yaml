@@ -1,29 +1,33 @@
 services:
   - type: web
     name: isufstpass
-    runtime: php
+    runtime: docker
     plan: free
-    buildCommand: composer install --no-dev && npm install && npm run build && php artisan config:cache && php artisan view:cache
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    dockerfilePath: Dockerfile
+    healthCheckPath: /up
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
       - key: APP_KEY
+        value: base64:5wCygFd1y0mYQyg7WRC4ld0YTrOuTDoP9jid347D2VU=
+      - key: APP_URL
+        sync: false
+      - key: QR_URL
         sync: false
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        sync: false
+        value: aws-0-ap-southeast-1.pooler.supabase.com
       - key: DB_PORT
         value: "5432"
       - key: DB_DATABASE
-        sync: false
+        value: postgres
       - key: DB_USERNAME
-        sync: false
+        value: postgres.iuoaerwtemlmfzwjwrsf
       - key: DB_PASSWORD
-        sync: false
+        value: calanao_1999
       - key: DB_SSLMODE
         value: require
       - key: SESSION_DRIVER
@@ -34,3 +38,31 @@ services:
         value: sync
       - key: TRUSTED_PROXIES
         value: "*"
+      - key: CRON_SECRET
+        value: e970cf9dd45ce1e837d8d3f915e4e35fff96f0af690dd1bf
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        value: calanaoanamarie9@gmail.com
+      - key: MAIL_PASSWORD
+        value: "drwx gjnl hjut gkxj"
+      - key: MAIL_FROM_ADDRESS
+        value: calanaoanamarie9@gmail.com
+      - key: MAIL_FROM_NAME
+        value: ISUFSTPASS
+      - key: SUPABASE_PROJECT_REF
+        value: iuoaerwtemlmfzwjwrsf
+      - key: S3_REGION
+        value: ap-southeast-1
+      - key: S3_BUCKET
+        value: avatars
+      - key: S3_ENDPOINT
+        value: https://iuoaerwtemlmfzwjwrsf.supabase.co/storage/v1/s3
+      - key: S3_PUBLIC_URL
+        value: https://iuoaerwtemlmfzwjwrsf.supabase.co/storage/v1/object/public/avatars
+      - key: S3_USE_PATH_STYLE_ENDPOINT
+        value: "true"
