@@ -22,14 +22,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader --no-scripts
 
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
 
-RUN npm run build \
+RUN cp .env.example .env \
+    && php artisan key:generate --force \
+    && composer run-script post-autoload-dump \
+    && npm run build \
     && mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data \
                storage/framework/testing storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
