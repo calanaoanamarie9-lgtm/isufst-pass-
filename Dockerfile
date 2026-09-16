@@ -12,10 +12,9 @@ RUN apt-get update \
     unzip \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql gd intl bcmath mbstring zip opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo_pgsql gd intl bcmath mbstring zip opcache
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
