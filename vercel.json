@@ -1,12 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install && composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader",
   "buildCommand": "npm run build",
-  "outputDirectory": "public/build",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/cron/reminders",
-      "schedule": "0 18 * * *"
-    }
+  "outputDirectory": "public",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/public/index.php" }
   ]
 }
